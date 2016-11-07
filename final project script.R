@@ -5,12 +5,13 @@ library(ggplot2)
 library(gridExtra)
 
 
-## ttest
+## Read the code from sqllite file
 db <- dbConnect(dbDriver("SQLite"), "F:/Data Minimg/college-scorecard-release-2015-09-23-15-08-57/output/database.sqlite")
 db
 sample <- dbGetQuery(db, "SELECT COSTT4_A AverageCostOfAttendance,
        md_earn_wne_p10 MedianEarnings,ZIP FROM Scorecard WHERE Year='2011'")
 View(sample)
+#data preparation
 sample<-sample[complete.cases(sample),]
 View(sample)
 sample <- sample[as.numeric(as.character(sample$MedianEarnings)) > 0,]
@@ -24,8 +25,9 @@ min(sample$roi)
 max(sample$roi)
 write.csv(sample, file = "zip1.csv")
 
-## the main thing
-
+## Exploratory Analysis
+#Utilized SAS inbuild zipcode file to extract the zipcode along with status that the area belonging to particular zipcode is a rural or urban area
+#Then combined that with the dataset to perform t-test.This was done to see whether rural area has better ROI or urban
 final_1$status<-NULL
 final_1$status<-ifelse(final_1$MSA>0,"URBAN","RURAL")
 View(final_1)
@@ -36,7 +38,7 @@ table(final_1$status)
 s<-t.test(final_1$roi~final_1$status)
 s
 
-
+#contunuing with Exploratory Analysis
 ### top 10 colleges with best roi for year 2011
 
 roi <- dbGetQuery(db, "SELECT COSTT4_A AverageCostOfAttendance,
@@ -65,7 +67,7 @@ salary1<-salary1[1:10,]
 View(salary1)# REMOVED MEDICAL of them were from medical
 
 
-##Admission rate
+##top 10 colleges with lowest Admission rate
 
 admin<-salary <- dbGetQuery(db, "SELECT 
        ADM_RATE_ALL,INSTNM FROM Scorecard WHERE Year='2013' AND PREDDEG='Predominantly bachelor''s-degree granting' AND PCIP14>0")
@@ -100,7 +102,7 @@ san<-san[order(-san$x),]
 View(san[1:10,])
 
 
-##SAT SCORE
+##Colleges with highest SAT SCORE
 
 ch<- dbGetQuery(db, "SELECT SATVRMID,INSTNM FROM Scorecard  WHERE Year='2013' AND PREDDEG='Predominantly bachelor''s-degree granting' AND PCIP14>0")
 View(ch)
@@ -115,7 +117,7 @@ ch1<-ch1[order(-ch1$SATMTMID),]
 View(ch1[1:10,])
 
 
-## most expensive colleges
+## top 10 most expensive colleges
 exp<- dbGetQuery(db, "SELECT COSTT4_A,INSTNM FROM Scorecard  WHERE Year='2013' AND PREDDEG='Predominantly bachelor''s-degree granting' AND PCIP14>0")
 View(exp)
 exp<-exp[complete.cases(exp),]
